@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier l'Utilisateur - ENCG Events Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #dc3545;
+        }
+        .breadcrumb-item a {
+            color: #dc3545;
+            text-decoration: none;
+        }
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border: none;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #a71e2a 0%, #dc3545 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #495057 0%, #6c757d 100%);
+            transform: translateY(-2px);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+            border: none;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: #212529;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #ffc107 100%);
+            transform: translateY(-2px);
+            color: #212529;
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+            font-size: 0.7em;
+            padding: 0.2em 0.5em;
+            border-radius: 10px;
+        }
+        .user-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+        }
+        .form-control:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        .form-check-input {
+            margin-top: 0.25rem;
+            margin-right: 0.5rem;
+        }
+        .form-check-input:checked {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+        }
+        .form-check-label {
+            font-weight: 500;
+            color: #495057;
+            cursor: pointer;
+        }
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 5px;
+        }
+        .form-text {
+            color: #6c757d;
+            font-size: 0.875em;
+            margin-top: 5px;
+        }
+        .role-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 10px;
+        }
+        .role-section h6 {
+            color: #dc3545;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        .role-option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .role-option:hover {
+            border-color: #dc3545;
+            background: #fef7f7;
+        }
+        .role-option.selected {
+            border-color: #dc3545;
+            background: #fef7f7;
+        }
+        .role-option .form-check {
+            margin-bottom: 0;
+        }
+        .role-option .role-title {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        .role-option .role-description {
+            font-size: 0.9em;
+            color: #6c757d;
+        }
+        .password-requirements {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 12px 16px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 10px;
+        }
+        .password-requirements h6 {
+            color: #856404;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+        .password-requirements ul {
+            font-size: 0.85em;
+            color: #495057;
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+        .user-info-badge {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .user-info-badge .user-avatar-large {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .current-roles-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar p-0">
+            <div class="p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-shield-alt fa-2x me-2"></i>
+                    <h4 class="mb-0">Admin Panel</h4>
+                </div>
+
+                <!-- User Info -->
+                <div class="text-center mb-4 p-3" style="background-color: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <div class="user-avatar mx-auto mb-2">
+                        {{ app.user.email|first|upper }}
+                    </div>
+                    <h6 class="mb-1">{{ app.user.email }}</h6>
+                    <span class="admin-badge">ADMINISTRATEUR</span>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                        <i class="fas fa-calendar-check me-2"></i> Toutes les Réservations
+                    </a>
+                    <a class="nav-link active" href="{{ path('app_admin_users') }}">
+                        <i class="fas fa-users me-2"></i> Gestion des Utilisateurs
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Mon Dashboard
+                    </a>
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="fas fa-home me-2"></i> Accueil Public
+                    </a>
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                    <a class="nav-link" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content p-0">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-1">Modifier l'Utilisateur</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item">
+                                    <a href="{{ path('app_admin_users') }}">Administration</a>
+                                </li>
+                                <li class="breadcrumb-item">
+                                    <a href="{{ path('app_admin_users') }}">Utilisateurs</a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                            </ol>
+                        </nav>
+                        <p class="text-muted mb-0">Modifiez les informations du compte utilisateur</p>
+                    </div>
+                    <div class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ "now"|date("d/m/Y") }}
+                    </div>
+                </div>
+
+                <!-- Current User Info -->
+                <div class="user-info-badge">
+                    <div class="d-flex align-items-center">
+                        <div class="user-avatar-large me-3">
+                            {{ user.name|first|upper }}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="mb-1">{{ user.name }}</h5>
+                            <div class="d-flex align-items-center">
+                                <span>{{ user.email }}</span>
+                                {% for role in user.roles %}
+                                    {% if role == 'ROLE_ADMIN' %}
+                                        <span class="current-roles-badge"><i class="fas fa-shield-alt me-1"></i>Admin</span>
+                                    {% elseif role == 'ROLE_USER' %}
+                                        <span class="current-roles-badge"><i class="fas fa-user me-1"></i>Utilisateur</span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <small>Utilisateur ID</small><br>
+                            <strong>#{{ user.id }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ label == 'success' ? 'check-circle' : (label == 'error' ? 'exclamation-circle' : 'info-circle') }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <!-- User Form -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white border-bottom-0">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-edit me-2 text-warning"></i>
+                            Modifier les Informations
+                        </h5>
+                    </div>
+                    <div class="card-body user-form">
+                        {{ form_start(form, {'attr': {'id': 'user-form', 'novalidate': 'novalidate'}}) }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.name, 'Nom Complet', {'class': 'form-label'}) }}
+                                    {{ form_widget(form.name, {'attr': {'class': 'form-control' ~ (form.name.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Entrez le nom complet'}}) }}
+                                    {% if form.name.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.name.vars.errors %}
+                                                {{ error.message }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.email, 'Adresse Email', {'class': 'form-label'}) }}
+                                    {{ form_widget(form.email, {'attr': {'class': 'form-control' ~ (form.email.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'exemple@email.com'}}) }}
+                                    {% if form.email.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.email.vars.errors %}
+                                                {{ error.message }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        L'adresse email est utilisée pour la connexion
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="mb-3">
+                                    {{ form_label(form.plainPassword, 'Nouveau Mot de Passe', {'class': 'form-label'}) }}
+                                    {{ form_widget(form.plainPassword, {'attr': {'class': 'form-control' ~ (form.plainPassword.vars.errors|length > 0 ? ' is-invalid' : ''), 'placeholder': 'Laissez vide pour conserver le mot de passe actuel'}}) }}
+                                    {% if form.plainPassword.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.plainPassword.vars.errors %}
+                                                {{ error.message }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Password Requirements -->
+                                    <div class="password-requirements">
+                                        <h6><i class="fas fa-exclamation-triangle me-1"></i>Modification du mot de passe :</h6>
+                                        <ul>
+                                            <li>Laissez ce champ vide pour conserver le mot de passe actuel</li>
+                                            <li>Si vous modifiez : au moins 6 caractères requis</li>
+                                            <li>Recommandé : mélange de lettres, chiffres et symboles</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Roles Section -->
+                        <div class="role-section">
+                            <h6>
+                                <i class="fas fa-user-shield me-2"></i>
+                                Rôles et Permissions
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <!-- Custom role selection -->
+                                    <div class="role-option {{ 'ROLE_USER' in user.roles ? 'selected' : '' }}" onclick="toggleRole('ROLE_USER')">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="{{ form.roles.vars.full_name }}[]" value="ROLE_USER" id="role_user" {{ 'ROLE_USER' in user.roles ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="role_user">
+                                                <div class="role-title">
+                                                    <i class="fas fa-user me-2 text-primary"></i>
+                                                    Utilisateur
+                                                </div>
+                                                <div class="role-description">
+                                                    Accès standard à la plateforme (création d'événements, réservations)
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="role-option {{ 'ROLE_ADMIN' in user.roles ? 'selected' : '' }}" onclick="toggleRole('ROLE_ADMIN')">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="{{ form.roles.vars.full_name }}[]" value="ROLE_ADMIN" id="role_admin" {{ 'ROLE_ADMIN' in user.roles ? 'checked' : '' }}>
+                                            <label class="form-check-label" for="role_admin">
+                                                <div class="role-title">
+                                                    <i class="fas fa-shield-alt me-2 text-danger"></i>
+                                                    Administrateur
+                                                </div>
+                                                <div class="role-description">
+                                                    Accès complet incluant gestion des utilisateurs et toutes les réservations
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    {% if form.roles.vars.errors|length > 0 %}
+                                        <div class="invalid-feedback">
+                                            {% for error in form.roles.vars.errors %}
+                                                {{ error.message }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                    <div class="form-text mt-3">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        Vous pouvez sélectionner plusieurs rôles pour un utilisateur
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-between mt-4">
+                            <div>
+                                <a href="{{ path('app_admin_user_show', {'id': user.id}) }}" class="btn btn-outline-info">
+                                    <i class="fas fa-eye me-1"></i> Voir les Détails
+                                </a>
+                            </div>
+                            <div class="d-grid gap-2 d-md-flex">
+                                <a href="{{ path('app_admin_users') }}" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-times me-1"></i> Annuler
+                                </a>
+                                <button type="submit" class="btn btn-warning" id="save-user-btn">
+                                    <i class="fas fa-save me-1"></i> Enregistrer les Modifications
+                                </button>
+                            </div>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="fas fa-question-circle me-2 text-info"></i>
+                            Aide et Instructions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h6 class="text-primary">
+                                    <i class="fas fa-user me-1"></i>
+                                    Rôle Utilisateur
+                                </h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li><i class="fas fa-check text-success me-2"></i>Créer des événements</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Faire des réservations</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Gérer son profil</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Voir ses propres réservations</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-danger">
+                                    <i class="fas fa-shield-alt me-1"></i>
+                                    Rôle Administrateur
+                                </h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li><i class="fas fa-check text-success me-2"></i>Toutes les permissions utilisateur</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Gérer tous les utilisateurs</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Voir toutes les réservations</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Accès au panel d'administration</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <h6 class="text-warning">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>
+                                    Points Importants
+                                </h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li><i class="fas fa-info text-info me-2"></i>Le mot de passe n'est modifié que si vous saisissez une nouvelle valeur</li>
+                                    <li><i class="fas fa-info text-info me-2"></i>Un utilisateur doit avoir au moins un rôle</li>
+                                    <li><i class="fas fa-info text-info me-2"></i>Les modifications prennent effet immédiatement</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation
+        const form = document.getElementById('user-form');
+        const saveBtn = document.getElementById('save-user-btn');
+
+        // Real-time password validation (optional field for edit)
+        const passwordInput = document.querySelector('input[type="password"]');
+        if (passwordInput) {
+            passwordInput.addEventListener('input', function() {
+                const password = this.value;
+
+                if (password.length > 0) {
+                    const isValid = password.length >= 6;
+                    if (isValid) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                    }
+                } else {
+                    // Empty is valid for edit (keeps current password)
+                    this.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+        }
+
+        // Email validation
+        const emailInput = document.querySelector('input[type="email"]');
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                const email = this.value;
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                const isValid = emailRegex.test(email);
+
+                if (email.length > 0) {
+                    if (isValid) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                    }
+                } else {
+                    this.classList.remove('is-valid', 'is-invalid');
+                }
+            });
+        }
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            const name = document.querySelector('input[name*="[name]"]').value.trim();
+            const email = document.querySelector('input[name*="[email]"]').value.trim();
+            const password = document.querySelector('input[name*="[plainPassword]"]').value;
+            const roles = document.querySelectorAll('input[name*="[roles]"]:checked');
+
+            // Basic validation
+            if (!name || !email) {
+                e.preventDefault();
+                alert('Veuillez remplir les champs nom et email.');
+                return false;
+            }
+
+            // Password validation (only if provided)
+            if (password && password.length < 6) {
+                e.preventDefault();
+                alert('Si vous modifiez le mot de passe, il doit contenir au moins 6 caractères.');
+                return false;
+            }
+
+            if (roles.length === 0) {
+                e.preventDefault();
+                alert('Veuillez sélectionner au moins un rôle pour l\'utilisateur.');
+                return false;
+            }
+
+            // Show loading state
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enregistrement en cours...';
+        });
+
+        // Role selection functions
+        window.toggleRole = function(role) {
+            const checkbox = document.getElementById('role_' + role.toLowerCase().split('_')[1]);
+            const roleOption = checkbox.closest('.role-option');
+
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                roleOption.classList.add('selected');
+            } else {
+                roleOption.classList.remove('selected');
+            }
+
+            // Ensure at least one role is selected
+            const checkedRoles = document.querySelectorAll('input[name*="[roles]"]:checked');
+            if (checkedRoles.length === 0) {
+                checkbox.checked = true;
+                roleOption.classList.add('selected');
+                alert('Un utilisateur doit avoir au moins un rôle.');
+            }
+        };
+
+        // Initialize role selections on page load
+        const roleCheckboxes = document.querySelectorAll('input[name*="[roles]"]');
+        roleCheckboxes.forEach(checkbox => {
+            const roleOption = checkbox.closest('.role-option');
+            if (checkbox.checked) {
+                roleOption.classList.add('selected');
+            }
+
+            checkbox.addEventListener('change', function() {
+                const checkedRoles = document.querySelectorAll('input[name*="[roles]"]:checked');
+                if (checkedRoles.length === 0) {
+                    this.checked = true;
+                    alert('Un utilisateur doit avoir au moins un rôle.');
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

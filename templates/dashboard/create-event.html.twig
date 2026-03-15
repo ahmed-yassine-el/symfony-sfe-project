@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un Événement - ENCG Events</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3d72 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .reservation-form {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .availability-status {
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .availability-available {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .availability-unavailable {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .availability-checking {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+        .fc-event:hover {
+            opacity: 0.8;
+        }
+        .room-filter {
+            margin-bottom: 15px;
+        }
+        .datetime-row {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+        }
+        .datetime-col {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar p-0">
+            <div class="p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-calendar-alt fa-2x me-2"></i>
+                    <h4 class="mb-0">ENCG Events</h4>
+                </div>
+
+                <!-- User Info -->
+                <div class="text-center mb-4 p-3" style="background-color: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <div class="user-avatar mx-auto mb-2">
+                        {{ user.email|first|upper }}
+                    </div>
+                    <h6 class="mb-1">{{ user.email }}</h6>
+                    <small class="text-light">{{ user.roles|join(', ') }}</small>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{{ path('app_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                    </a>
+                    <a class="nav-link active" href="{{ path('app_dashboard_create_event') }}">
+                        <i class="fas fa-plus me-2"></i> Créer un Événement
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard_reservations') }}">
+                        <i class="fas fa-calendar-check me-2"></i> Mes Réservations
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard_profile') }}">
+                        <i class="fas fa-user me-2"></i> Profil
+                    </a>
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="fas fa-home me-2"></i> Accueil Public
+                    </a>
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                    <a class="nav-link" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content p-0">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-1">Créer un Événement</h2>
+                        <p class="text-muted mb-0">Planifiez et réservez un événement dans nos locaux</p>
+                    </div>
+                    <div class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ "now"|date("d/m/Y") }}
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <!-- Reservation Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-plus me-1"></i>
+                        Créer un Nouvel Événement
+                    </div>
+                    <div class="card-body reservation-form">
+                        {{ form_start(form, {'attr': {'id': 'reservation-form'}}) }}
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.name, 'Nom de l\'Événement', {'class': 'form-label'}) }}
+                                    {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+                                    {{ form_errors(form.name) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    {{ form_label(form.room, 'Salle', {'class': 'form-label'}) }}
+                                    {{ form_widget(form.room, {'attr': {'class': 'form-control', 'id': 'event_room'}}) }}
+                                    {{ form_errors(form.room) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.description, 'Description', {'class': 'form-label'}) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="start_datetime" class="form-label">Date et Heure de Début</label>
+                                    <input type="datetime-local" id="start_datetime" name="start_datetime" class="form-control" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="end_datetime" class="form-label">Date et Heure de Fin</label>
+                                    <input type="datetime-local" id="end_datetime" name="end_datetime" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.imageFile, 'Image de l\'Événement', {'class': 'form-label'}) }}
+                            {{ form_widget(form.imageFile, {'attr': {'class': 'form-control'}}) }}
+                            <small class="form-text text-muted">Téléchargez une image JPEG ou PNG (max 1MB)</small>
+                            {{ form_errors(form.imageFile) }}
+                        </div>
+
+                        <!-- Availability Status -->
+                        <div id="availability-status" class="availability-status" style="display: none;">
+                            <span id="availability-message"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-primary" id="save-event-btn">
+                                <i class="fas fa-save me-1"></i> Créer l'Événement
+                            </button>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Calendar -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-calendar me-1"></i>
+                            Calendrier des Réservations
+                        </div>
+                        <div class="room-filter">
+                            <select id="room-filter" class="form-select form-select-sm">
+                                <option value="">Toutes les Salles</option>
+                                {% for room in rooms %}
+                                    <option value="{{ room.id }}">{{ room.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="calendar-container">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+    let calendar;
+    let currentRoomFilter = '';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+
+        // Initialize FullCalendar
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            selectable: true,
+            selectMirror: true,
+            editable: false,
+            dayMaxEvents: true,
+            events: function(fetchInfo, successCallback, failureCallback) {
+                loadReservations(fetchInfo.start, fetchInfo.end, successCallback, failureCallback);
+            },
+            eventClick: function(info) {
+                showEventDetails(info.event);
+            },
+            select: function(info) {
+                selectTimeSlot(info.start, info.end);
+            },
+            eventColor: '#0d6efd',
+            eventDisplay: 'block'
+        });
+
+        calendar.render();
+
+        // Event handlers
+        document.getElementById('room-filter').addEventListener('change', function() {
+            currentRoomFilter = this.value;
+            calendar.refetchEvents();
+        });
+
+        document.getElementById('event_room').addEventListener('change', checkAvailability);
+        document.getElementById('start_datetime').addEventListener('change', checkAvailability);
+        document.getElementById('end_datetime').addEventListener('change', checkAvailability);
+
+        // Form submission
+        document.getElementById('reservation-form').addEventListener('submit', function(e) {
+            const statusDiv = document.getElementById('availability-status');
+
+            // Debug: Log form data before submission
+            const formData = new FormData(this);
+            console.log('=== FORM SUBMISSION DEBUG ===');
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            // Check required fields
+            const roomValue = document.getElementById('event_room').value;
+            const startDateTime = document.getElementById('start_datetime').value;
+            const endDateTime = document.getElementById('end_datetime').value;
+
+            console.log('Room ID:', roomValue);
+            console.log('Start DateTime:', startDateTime);
+            console.log('End DateTime:', endDateTime);
+
+            if (!roomValue || !startDateTime || !endDateTime) {
+                e.preventDefault();
+                alert('Veuillez remplir tous les champs obligatoires : salle, heure de début et heure de fin.');
+                return false;
+            }
+
+            if (statusDiv.classList.contains('availability-unavailable')) {
+                e.preventDefault();
+                alert('Impossible de créer l\'événement : La salle sélectionnée n\'est pas disponible pour cette période.');
+                return false;
+            }
+        });
+
+        // Check if there's a success message and refresh calendar
+        {% if app.flashes('success') %}
+        // Refresh calendar after successful event creation
+        setTimeout(function() {
+            calendar.refetchEvents();
+            // Clear form
+            document.getElementById('reservation-form').reset();
+            document.getElementById('availability-status').style.display = 'none';
+        }, 500);
+        {% endif %}
+    });
+
+    // Load reservations from server
+    function loadReservations(start, end, successCallback, failureCallback) {
+        let url = `/dashboard/event/reservations?start=${start.toISOString()}&end=${end.toISOString()}`;
+
+        if (currentRoomFilter) {
+            url += `&room_id=${currentRoomFilter}`;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const events = data.map(reservation => ({
+                    id: reservation.id,
+                    title: `${reservation.title} (${reservation.room})`,
+                    start: reservation.start,
+                    end: reservation.end,
+                    extendedProps: {
+                        roomId: reservation.roomId,
+                        room: reservation.room,
+                        description: reservation.description,
+                        eventId: reservation.eventId
+                    },
+                    backgroundColor: getRoomColor(reservation.roomId),
+                    borderColor: getRoomColor(reservation.roomId)
+                }));
+                successCallback(events);
+            })
+            .catch(error => {
+                console.error('Error loading reservations:', error);
+                failureCallback(error);
+            });
+    }
+
+    // Generate consistent colors for rooms
+    function getRoomColor(roomId) {
+        const colors = ['#0d6efd', '#6f42c1', '#dc3545', '#fd7e14', '#198754', '#20c997', '#0dcaf0'];
+        return colors[roomId % colors.length];
+    }
+
+    // Handle calendar time slot selection
+    function selectTimeSlot(start, end) {
+        // Convert to local datetime format for inputs
+        const startLocal = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+        const endLocal = new Date(end.getTime() - end.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+
+        document.getElementById('start_datetime').value = startLocal;
+        document.getElementById('end_datetime').value = endLocal;
+
+        checkAvailability();
+
+        // Scroll to form
+        document.querySelector('.reservation-form').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Show event details
+    function showEventDetails(event) {
+        const details = `
+Event: ${event.title}
+Room: ${event.extendedProps.room}
+Start: ${new Date(event.start).toLocaleString()}
+End: ${new Date(event.end).toLocaleString()}
+${event.extendedProps.description ? 'Description: ' + event.extendedProps.description : ''}
+            `;
+        alert(details.trim());
+    }
+
+    // Check availability
+    function checkAvailability() {
+        const roomId = document.getElementById('event_room').value;
+        const startDateTime = document.getElementById('start_datetime').value;
+        const endDateTime = document.getElementById('end_datetime').value;
+
+        const statusDiv = document.getElementById('availability-status');
+        const messageSpan = document.getElementById('availability-message');
+
+        if (!roomId || !startDateTime || !endDateTime) {
+            statusDiv.style.display = 'none';
+            return;
+        }
+
+        // Validate start before end
+        if (new Date(startDateTime) >= new Date(endDateTime)) {
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'availability-status availability-unavailable';
+            messageSpan.textContent = '✗ Start time must be before end time';
+            return;
+        }
+
+        // Show checking status
+        statusDiv.style.display = 'block';
+        statusDiv.className = 'availability-status availability-checking';
+        messageSpan.textContent = 'Checking availability...';
+
+        fetch('/admin/event/check-availability', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                room_id: roomId,
+                start_time: startDateTime,
+                end_time: endDateTime
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.available) {
+                    statusDiv.className = 'availability-status availability-available';
+                    messageSpan.textContent = '✓ ' + data.message;
+                } else {
+                    statusDiv.className = 'availability-status availability-unavailable';
+                    messageSpan.textContent = '✗ ' + data.message;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking availability:', error);
+                statusDiv.className = 'availability-status availability-unavailable';
+                messageSpan.textContent = 'Error checking availability';
+            });
+    }
+</script>

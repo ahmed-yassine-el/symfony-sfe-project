@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toutes les Réservations - ENCG Events Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #dc3545;
+        }
+        .breadcrumb-item a {
+            color: #dc3545;
+            text-decoration: none;
+        }
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #a71e2a 0%, #dc3545 100%);
+            transform: translateY(-2px);
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #dc3545;
+        }
+        .badge {
+            font-size: 0.75em;
+            padding: 0.4em 0.8em;
+        }
+        .status-active {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+        .status-completed {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        .status-upcoming {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        .status-today {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+            font-size: 0.7em;
+            padding: 0.2em 0.5em;
+            border-radius: 10px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-initial {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar p-0">
+            <div class="p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-shield-alt fa-2x me-2"></i>
+                    <h4 class="mb-0">Admin Panel</h4>
+                </div>
+
+                <!-- User Info -->
+                <div class="text-center mb-4 p-3" style="background-color: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <div class="user-avatar mx-auto mb-2">
+                        {{ app.user.email|first|upper }}
+                    </div>
+                    <h6 class="mb-1">{{ app.user.email }}</h6>
+                    <span class="admin-badge">ADMINISTRATEUR</span>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="{{ path('app_admin_dashboard') }}">
+                        <i class="fas fa-calendar-check me-2"></i> Toutes les Réservations
+                    </a>
+                    <a class="nav-link active" href="{{ path('app_admin_users') }}">
+                        <i class="fas fa-calendar-check me-2"></i> Gestion des Utilisateurs
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Mon Dashboard
+                    </a>
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="fas fa-home me-2"></i> Accueil Public
+                    </a>
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                    <a class="nav-link" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content p-0">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-1">Toutes les Réservations</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item active" aria-current="page">Administration</li>
+                                <li class="breadcrumb-item active" aria-current="page">Toutes les Réservations</li>
+                            </ol>
+                        </nav>
+                        <p class="text-muted mb-0">Gérez toutes les réservations d'événements de la plateforme</p>
+                    </div>
+                    <div class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ "now"|date("d/m/Y") }}
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ label == 'success' ? 'check-circle' : (label == 'error' ? 'exclamation-circle' : 'info-circle') }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <!-- Admin Stats -->
+                <div class="row mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                            <div class="card-body">
+                                <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ totalReservations }}</h4>
+                                <p class="mb-0">Total Réservations</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
+                            <div class="card-body">
+                                <i class="fas fa-play-circle fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ activeCount }}</h4>
+                                <p class="mb-0">En Cours</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                            <div class="card-body">
+                                <i class="fas fa-calendar-plus fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ upcomingCount }}</h4>
+                                <p class="mb-0">À Venir</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="card text-center" style="background: linear-gradient(135deg, #6c757d 0%, #495057 100%); color: white;">
+                            <div class="card-body">
+                                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ completedCount }}</h4>
+                                <p class="mb-0">Terminées</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- All Reservations Table -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table me-2 text-danger"></i>
+                            Toutes les réservations de la plateforme
+                        </h5>
+                        <span class="badge bg-danger">{{ totalReservations }} réservation(s)</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="datatablesSimple" class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Utilisateur</th>
+                                    <th>Nom de l'événement</th>
+                                    <th>Date</th>
+                                    <th>Heure</th>
+                                    <th>Salle</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for reservation in allReservations %}
+                                    <tr>
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="user-initial">
+                                                    {{ reservation.user.email|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <strong>{{ reservation.user.email|split('@')|first|title }}</strong>
+                                                    <br><small class="text-muted">{{ reservation.user.email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <strong>{{ reservation.event.name }}</strong>
+                                            {% if reservation.event.description %}
+                                                <br><small class="text-muted">{{ reservation.event.description|slice(0, 50) }}{% if reservation.event.description|length > 50 %}...{% endif %}</small>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ reservation.startTime|date('d/m/Y') }}</td>
+                                        <td>{{ reservation.startTime|date('H:i') }} - {{ reservation.endTime|date('H:i') }}</td>
+                                        <td>
+                                            <i class="fas fa-door-open me-1 text-muted"></i>
+                                            {{ reservation.room.name }}
+                                        </td>
+                                        <td>
+                                            {% set now = date() %}
+                                            {% set today = now|date('Y-m-d') %}
+                                            {% set reservationDate = reservation.startTime|date('Y-m-d') %}
+
+                                            {% if reservation.endTime < now %}
+                                                <span class="badge status-completed">
+                                                    <i class="fas fa-check-circle me-1"></i>Terminé
+                                                </span>
+                                            {% elseif reservation.startTime <= now and reservation.endTime > now %}
+                                                <span class="badge status-active">
+                                                    <i class="fas fa-play-circle me-1"></i>En cours
+                                                </span>
+                                            {% elseif reservationDate == today %}
+                                                <span class="badge status-today">
+                                                    <i class="fas fa-clock me-1"></i>Aujourd'hui
+                                                </span>
+                                            {% else %}
+                                                <span class="badge status-upcoming">
+                                                    <i class="fas fa-calendar-plus me-1"></i>À venir
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ path('app_dashboard_show_event', {'id': reservation.event.id}) }}"
+                                                   class="btn btn-outline-info" title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ path('app_admin_edit_event', {'id': reservation.event.id}) }}"
+                                                   class="btn btn-outline-primary" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form method="post"
+                                                      action="{{ path('app_admin_delete_event', {'id': reservation.event.id}) }}"
+                                                      style="display: inline-block"
+                                                      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette réservation et l\'événement associé ? Cette action est irréversible.');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reservation.event.id) }}">
+                                                    <button class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="7" class="text-center py-5">
+                                            <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">Aucune réservation trouvée</h5>
+                                            <p class="text-muted">Il n'y a actuellement aucune réservation sur la plateforme.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#datatablesSimple').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json"
+            },
+            "order": [[ 2, "desc" ]], // Order by date descending
+            "pageLength": 15,
+            "responsive": true,
+            "columnDefs": [
+                {
+                    "targets": [0], // User column
+                    "orderable": true,
+                    "searchable": true
+                }
+            ]
+        });
+    });
+</script>
+</body>
+</html>

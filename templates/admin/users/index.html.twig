@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Utilisateurs - ENCG Events Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.11.5/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #dc3545;
+        }
+        .breadcrumb-item a {
+            color: #dc3545;
+            text-decoration: none;
+        }
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #a71e2a 0%, #dc3545 100%);
+            transform: translateY(-2px);
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #dc3545;
+        }
+        .badge {
+            font-size: 0.75em;
+            padding: 0.4em 0.8em;
+        }
+        .role-admin {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+        }
+        .role-user {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+            font-size: 0.7em;
+            padding: 0.2em 0.5em;
+            border-radius: 10px;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-initial {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .stats-card-admin {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+        }
+        .stats-card-user {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar p-0">
+            <div class="p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-shield-alt fa-2x me-2"></i>
+                    <h4 class="mb-0">Admin Panel</h4>
+                </div>
+
+                <!-- User Info -->
+                <div class="text-center mb-4 p-3" style="background-color: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <div class="user-avatar mx-auto mb-2">
+                        {{ app.user.email|first|upper }}
+                    </div>
+                    <h6 class="mb-1">{{ app.user.email }}</h6>
+                    <span class="admin-badge">ADMINISTRATEUR</span>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{{ path('app_admin_dashboard') }}">
+                        <i class="fas fa-calendar-check me-2"></i> Toutes les Réservations
+                    </a>
+                    <a class="nav-link active" href="{{ path('app_admin_users') }}">
+                        <i class="fas fa-users me-2"></i> Gestion des Utilisateurs
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Mon Dashboard
+                    </a>
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="fas fa-home me-2"></i> Accueil Public
+                    </a>
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                    <a class="nav-link" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content p-0">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-1">Gestion des Utilisateurs</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item active" aria-current="page">Administration</li>
+                                <li class="breadcrumb-item active" aria-current="page">Utilisateurs</li>
+                            </ol>
+                        </nav>
+                        <p class="text-muted mb-0">Gérez tous les utilisateurs de la plateforme</p>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                        <a href="{{ path('app_admin_user_new') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Ajouter un Utilisateur
+                        </a>
+                        <div class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ "now"|date("d/m/Y") }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ label == 'success' ? 'check-circle' : (label == 'error' ? 'exclamation-circle' : 'info-circle') }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <!-- Statistics -->
+                <div class="row mb-4">
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center stats-card">
+                            <div class="card-body">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ totalUsers }}</h4>
+                                <p class="mb-0">Total Utilisateurs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center stats-card-admin">
+                            <div class="card-body">
+                                <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ adminCount }}</h4>
+                                <p class="mb-0">Administrateurs</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card text-center stats-card-user">
+                            <div class="card-body">
+                                <i class="fas fa-user fa-2x mb-2"></i>
+                                <h4 class="mb-1">{{ regularCount }}</h4>
+                                <p class="mb-0">Utilisateurs Standards</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Users Table -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white border-bottom-0 d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table me-2 text-danger"></i>
+                            Tous les utilisateurs
+                        </h5>
+                        <span class="badge bg-danger">{{ totalUsers }} utilisateur(s)</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="usersTable" class="table table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Utilisateur</th>
+                                    <th>Email</th>
+                                    <th>Rôles</th>
+                                    <th>Réservations</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for user in users %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge bg-secondary">#{{ user.id }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                <div class="user-initial">
+                                                    {{ user.name ? user.name|first|upper : user.email|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <strong>{{ user.name ?: 'Non défini' }}</strong>
+                                                    {% if user == app.user %}
+                                                        <span class="badge bg-info ms-2">C'est vous</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ user.email }}</td>
+                                        <td>
+                                            {% for role in user.roles %}
+                                                {% if role == 'ROLE_ADMIN' %}
+                                                    <span class="badge role-admin">
+                                                        <i class="fas fa-shield-alt me-1"></i>Admin
+                                                    </span>
+                                                {% elseif role == 'ROLE_USER' %}
+                                                    <span class="badge role-user">
+                                                        <i class="fas fa-user me-1"></i>Utilisateur
+                                                    </span>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">
+                                                {{ user.reservations|length }} réservation(s)
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{{ path('app_admin_user_show', {'id': user.id}) }}"
+                                                   class="btn btn-outline-info" title="Voir les détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ path('app_admin_user_edit', {'id': user.id}) }}"
+                                                   class="btn btn-outline-primary" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                {% if user != app.user %}
+                                                    <form method="post"
+                                                          action="{{ path('app_admin_user_delete', {'id': user.id}) }}"
+                                                          style="display: inline-block"
+                                                          onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible et supprimera également toutes ses réservations.');">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                                                        <button class="btn btn-outline-danger btn-sm" title="Supprimer">
+                                                            <i class="fas fa-trash"></i>
+                                                        </button>
+                                                    </form>
+                                                {% else %}
+                                                    <button class="btn btn-outline-secondary btn-sm" disabled title="Vous ne pouvez pas vous supprimer">
+                                                        <i class="fas fa-ban"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5">
+                                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                            <h5 class="text-muted">Aucun utilisateur trouvé</h5>
+                                            <p class="text-muted">Il n'y a actuellement aucun utilisateur sur la plateforme.</p>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#usersTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.11.5/i18n/fr-FR.json"
+            },
+            "order": [[ 0, "desc" ]], // Order by ID descending
+            "pageLength": 15,
+            "responsive": true,
+            "columnDefs": [
+                {
+                    "targets": [5], // Actions column
+                    "orderable": false,
+                    "searchable": false
+                }
+            ]
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,444 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+* {
+    font-family: "Poppins", serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+    scroll-padding-top: 3rem;
+    list-style: none;
+    text-decoration: none;
+}
+
+:root {
+    --main-color: #2288ff;
+    --second-color: #192f6a;
+    --text-color: #314862;
+    --bg-color: #fff;
+    --box-shadow: 2px 2px 18px rgb(14 52 54 / 15%);
+}
+
+img {
+    width: 100%;
+}
+
+body {
+    color: var(--text-color);
+}
+
+section {
+    padding: 4.4rem 0 3rem;
+}
+
+.container {
+    max-width: 1068px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Header Styles */
+header {
+    display: block;
+    width: 100%;
+    background: var(--bg-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: var(--box-shadow);
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 35px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    column-gap: 0.5rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.logo .bx {
+    font-size: 24px;
+    color: var(--main-color);
+}
+
+.navbar {
+    display: flex;
+}
+
+.navbar a {
+    padding: 8px 17px;
+    color: var(--text-color);
+    font-size: 1rem;
+    text-transform: uppercase;
+    font-weight: 500;
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar a:hover {
+    color: var(--main-color);
+}
+
+/* USER ICON FIX - This is the crucial fix */
+.user-display .user-icon {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.user-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.username {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.logout-link {
+    color: var(--text-color);
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.logout-link:hover {
+    color: var(--main-color);
+    text-decoration: underline;
+}
+
+.btn{
+    padding: 8px 22px;
+    background: var(--main-color);
+    color: var(--bg-color);
+    border-radius: 5rem;
+}
+.btn:hover {
+    background: #3492fd;
+}
+
+
+/* USER SECTION - PERFECTED */
+.user-section {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+#username {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+
+#menu-icon {
+    font-size: 24px;
+    cursor: pointer;
+    display: none;
+}
+
+#menu {
+    display: none;
+}
+
+/* Home Section */
+.home {
+    margin-top: 5rem;
+}
+
+.home-text h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+/* About Section */
+.about {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+.about-text span {
+    color: var(--main-color);
+    font-weight: 600;
+}
+
+.about-text h2 {
+    font-size: 2rem;
+    margin: 1rem 0;
+}
+
+/* Sales Section */
+.sales-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.box {
+    padding: 1.5rem;
+    background: var(--bg-color);
+    box-shadow: 0 4px 15px rgba(44, 90, 160, 0.1);
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid #f0f0f0;
+}
+
+.box i {
+    font-size: 2rem;
+    color: var(--main-color);
+    margin-bottom: 1rem;
+}
+
+.box h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Properties Section */
+.properties-container {
+    margin-top: 2rem;
+}
+
+.properties-container .heading {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.properties {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.properties .box {
+    transition: 0.3s all ease;
+}
+
+.properties .box:hover {
+    transform: translateY(-10px);
+}
+
+.properties .box img {
+    border-radius: 0.5rem;
+    height: 200px;
+    object-fit: cover;
+}
+
+.properties .box .content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 1rem;
+}
+
+.properties .box .text h3 {
+    font-size: 1.1rem;
+}
+
+.properties .box .icon {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.properties .box .icon i {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+    color: #2c5aa0;
+}
+
+/* Newsletter Section */
+.Newsletter {
+    background: var(--main-color);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    color: white;
+}
+
+.Newsletter h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+.Newsletter form {
+    display: flex;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.Newsletter form input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 0.5rem 0 0 0.5rem;
+    border: none;
+    outline: none;
+}
+
+.Newsletter form input[type="submit"] {
+    padding: 0 1.5rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    border: none;
+    background: var(--second-color);
+    color: white;
+    cursor: pointer;
+}
+
+/* Footer */
+.footer {
+    background: var(--second-color);
+    color: white;
+    padding: 3rem 0;
+}
+
+.footer-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+}
+
+.footer-box h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+}
+
+.footer-box a {
+    color: white;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.footer-box a:hover {
+    color: var(--main-color);
+}
+
+.social {
+    display: flex;
+    column-gap: 1rem;
+    margin-top: 1rem;
+}
+
+.social a i {
+    font-size: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav {
+        padding: 15px 20px;
+    }
+
+    #menu-icon {
+        display: initial;
+    }
+
+    .navbar {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        background: var(--second-color);
+        text-align: center;
+        clip-path: circle(0% at 100% 1%);
+        transition: 0.6s;
+    }
+
+    .navbar a {
+        display: block;
+        margin: 1rem;
+        padding: 20px;
+        color: var(--bg-color);
+    }
+
+    .navbar a:hover {
+        background: var(--main-color);
+        color: var(--bg-color);
+        transition: 0.2s;
+    }
+    
+
+    #menu:checked ~ .navbar {
+        clip-path: circle(144% at 100% 1%);
+    }
+
+    .user-display {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .logo {
+        font-size: 1rem;
+    }
+
+    .navbar a {
+        font-size: 0.9rem;
+    }
+
+
+    .home-text h1 {
+        font-size: 2rem;
+    }
+}
+
+
+
+
+
+
+/* USER SECTION - PERFECTED */
+.user-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.username {
+    font-size: 0.9rem;
+    color: #314862;
+    font-weight: 500;
+}

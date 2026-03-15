@@ -1,0 +1,9 @@
+framework:
+    router:
+        utf8: true
+    # ... other framework configurations
+    session:
+        enabled: true
+        # Optional: Configure cookie settings
+        cookie_secure: auto
+        cookie_samesite: lax

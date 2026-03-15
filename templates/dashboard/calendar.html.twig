@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendrier des Événements - ENCG Events</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3d72 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .calendar-container {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .fc-event {
+            cursor: pointer;
+            border-radius: 6px;
+            padding: 2px 4px;
+            font-size: 12px;
+        }
+        .fc-event:hover {
+            opacity: 0.8;
+            transform: scale(1.02);
+            transition: all 0.2s ease;
+        }
+        .room-filter {
+            margin-bottom: 15px;
+        }
+        .calendar-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        .stats-cards {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c5aa0;
+        }
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .view-toggle .btn {
+            font-size: 14px;
+        }
+        .event-details-modal {
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar p-0">
+            <div class="p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-calendar-alt fa-2x me-2"></i>
+                    <h4 class="mb-0">ENCG Events</h4>
+                </div>
+
+                <!-- User Info -->
+                <div class="text-center mb-4 p-3" style="background-color: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <div class="user-avatar mx-auto mb-2">
+                        {{ user.email|first|upper }}
+                    </div>
+                    <h6 class="mb-1">{{ user.email }}</h6>
+                    <small class="text-light">{{ user.roles|join(', ') }}</small>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{{ path('app_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard_create_event') }}">
+                        <i class="fas fa-plus me-2"></i> Créer un Événement
+                    </a>
+                    <a class="nav-link active" href="{{ path('app_dashboard_calendar') }}">
+                        <i class="fas fa-calendar me-2"></i> Calendrier
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard_reservations') }}">
+                        <i class="fas fa-calendar-check me-2"></i> Mes Réservations
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard_profile') }}">
+                        <i class="fas fa-user me-2"></i> Profil
+                    </a>
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="fas fa-home me-2"></i> Accueil Public
+                    </a>
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                    <a class="nav-link" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content p-0">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-1">Calendrier des Événements</h2>
+                        <p class="text-muted mb-0">Visualisez tous les événements et réservations</p>
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <a href="{{ path('app_dashboard_create_event') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>
+                            Créer un Événement
+                        </a>
+                        <div class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ "now"|date("d/m/Y") }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-events">-</div>
+                        <div class="stat-label">Événements ce mois</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="available-rooms">{{ rooms|length }}</div>
+                        <div class="stat-label">Salles disponibles</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="today-events">-</div>
+                        <div class="stat-label">Événements aujourd'hui</div>
+                    </div>
+                </div>
+
+                <!-- Calendar Controls -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap">
+                            <div class="d-flex align-items-center gap-3">
+                                <i class="fas fa-calendar me-1"></i>
+                                <span>Calendrier</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <!-- View Toggle -->
+                                <div class="view-toggle">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="month-view">
+                                        <i class="fas fa-calendar-alt me-1"></i> Mois
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="week-view">
+                                        <i class="fas fa-calendar-week me-1"></i> Semaine
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-primary" id="day-view">
+                                        <i class="fas fa-calendar-day me-1"></i> Jour
+                                    </button>
+                                </div>
+
+                                <!-- Room Filter -->
+                                <div class="room-filter">
+                                    <select id="room-filter" class="form-select form-select-sm">
+                                        <option value="">Toutes les Salles</option>
+                                        {% for room in rooms %}
+                                            <option value="{{ room.id }}">{{ room.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <!-- Calendar Legend -->
+                        <div class="calendar-legend" id="calendar-legend">
+                            <strong class="me-3">Légende :</strong>
+                            <!-- Legend items will be populated by JavaScript -->
+                        </div>
+
+                        <!-- Calendar Container -->
+                        <div class="calendar-container">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Event Details Modal -->
+<div class="modal fade" id="eventDetailsModal" tabindex="-1" aria-labelledby="eventDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog event-details-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventDetailsModalLabel">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Détails de l'Événement
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="eventDetailsContent">
+                <!-- Event details will be populated by JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+<script>
+    let calendar;
+    let currentRoomFilter = '';
+    let allEvents = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+
+        // Initialize FullCalendar
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'fr',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: ''
+            },
+            selectable: false,
+            selectMirror: false,
+            editable: false,
+            dayMaxEvents: 3,
+            events: function(fetchInfo, successCallback, failureCallback) {
+                loadReservations(fetchInfo.start, fetchInfo.end, successCallback, failureCallback);
+            },
+            eventClick: function(info) {
+                showEventDetailsModal(info.event);
+            },
+            eventMouseEnter: function(info) {
+                info.el.style.transform = 'scale(1.05)';
+                info.el.style.zIndex = '1000';
+            },
+            eventMouseLeave: function(info) {
+                info.el.style.transform = 'scale(1)';
+                info.el.style.zIndex = 'auto';
+            },
+            eventDidMount: function(info) {
+                // Add tooltip
+                info.el.setAttribute('title', `${info.event.title} - ${info.event.extendedProps.room}`);
+            },
+            datesSet: function() {
+                updateStats();
+            }
+        });
+
+        calendar.render();
+
+        // Event handlers for view toggle
+        document.getElementById('month-view').addEventListener('click', function() {
+            calendar.changeView('dayGridMonth');
+            updateActiveViewButton(this);
+        });
+
+        document.getElementById('week-view').addEventListener('click', function() {
+            calendar.changeView('timeGridWeek');
+            updateActiveViewButton(this);
+        });
+
+        document.getElementById('day-view').addEventListener('click', function() {
+            calendar.changeView('timeGridDay');
+            updateActiveViewButton(this);
+        });
+
+        // Room filter handler
+        document.getElementById('room-filter').addEventListener('change', function() {
+            currentRoomFilter = this.value;
+            calendar.refetchEvents();
+            updateLegend();
+        });
+
+        // Set initial active view button
+        updateActiveViewButton(document.getElementById('month-view'));
+    });
+
+    // Load reservations from server
+    function loadReservations(start, end, successCallback, failureCallback) {
+        let url = `/dashboard/event/reservations?start=${start.toISOString()}&end=${end.toISOString()}`;
+
+        if (currentRoomFilter) {
+            url += `&room_id=${currentRoomFilter}`;
+        }
+
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                allEvents = data; // Store for stats calculation
+                const events = data.map(reservation => ({
+                    id: reservation.id,
+                    title: reservation.title,
+                    start: reservation.start,
+                    end: reservation.end,
+                    extendedProps: {
+                        roomId: reservation.roomId,
+                        room: reservation.room,
+                        description: reservation.description,
+                        eventId: reservation.eventId
+                    },
+                    backgroundColor: getRoomColor(reservation.roomId),
+                    borderColor: getRoomColor(reservation.roomId)
+                }));
+                successCallback(events);
+                updateLegend();
+                updateStats();
+            })
+            .catch(error => {
+                console.error('Error loading reservations:', error);
+                failureCallback(error);
+            });
+    }
+
+    // Generate consistent colors for rooms
+    function getRoomColor(roomId) {
+        const colors = ['#0d6efd', '#6f42c1', '#dc3545', '#fd7e14', '#198754', '#20c997', '#0dcaf0', '#6c757d'];
+        return colors[roomId % colors.length];
+    }
+
+    // Update active view button
+    function updateActiveViewButton(activeButton) {
+        document.querySelectorAll('.view-toggle .btn').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+        });
+        activeButton.classList.remove('btn-outline-primary');
+        activeButton.classList.add('btn-primary');
+    }
+
+    // Show event details in modal
+    function showEventDetailsModal(event) {
+        const modal = new bootstrap.Modal(document.getElementById('eventDetailsModal'));
+        const content = document.getElementById('eventDetailsContent');
+
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-12">
+                    <h6><i class="fas fa-tag me-2"></i>Nom de l'événement</h6>
+                    <p class="mb-3">${event.title}</p>
+
+                    <h6><i class="fas fa-door-open me-2"></i>Salle</h6>
+                    <p class="mb-3">
+                        <span class="badge" style="background-color: ${getRoomColor(event.extendedProps.roomId)};">
+                            ${event.extendedProps.room}
+                        </span>
+                    </p>
+
+                    <h6><i class="fas fa-clock me-2"></i>Horaires</h6>
+                    <p class="mb-3">
+                        <strong>Début :</strong> ${startDate.toLocaleString('fr-FR')}<br>
+                        <strong>Fin :</strong> ${endDate.toLocaleString('fr-FR')}<br>
+                        <strong>Durée :</strong> ${calculateDuration(startDate, endDate)}
+                    </p>
+
+                    ${event.extendedProps.description ? `
+                        <h6><i class="fas fa-info-circle me-2"></i>Description</h6>
+                        <p class="mb-0">${event.extendedProps.description}</p>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        modal.show();
+    }
+
+    // Calculate duration between two dates
+    function calculateDuration(start, end) {
+        const diffMs = end - start;
+        const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+        const diffMinutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (diffHours > 0) {
+            return `${diffHours}h ${diffMinutes > 0 ? diffMinutes + 'min' : ''}`;
+        } else {
+            return `${diffMinutes}min`;
+        }
+    }
+
+    // Update calendar legend
+    function updateLegend() {
+        const legendContainer = document.getElementById('calendar-legend');
+        const roomSelect = document.getElementById('room-filter');
+
+        // Get all rooms from the select options (excluding "Toutes les Salles")
+        const allRoomOptions = roomSelect.querySelectorAll('option[value]:not([value=""])');
+
+        let legendHTML = '<strong class="me-3">Légende :</strong>';
+
+        if (allRoomOptions.length === 0) {
+            legendHTML += '<span class="text-muted">Aucune salle disponible</span>';
+        } else {
+            // Show all rooms, not just those with events
+            allRoomOptions.forEach(roomOption => {
+                const roomId = roomOption.value;
+                const roomName = roomOption.textContent;
+
+                // Check if this room has events (for visual indication)
+                const hasEvents = allEvents.some(event => event.roomId == roomId);
+                const opacity = hasEvents ? '1' : '0.5'; // Dim rooms without events
+
+                legendHTML += `
+                    <div class="legend-item" style="opacity: ${opacity};">
+                        <div class="legend-color" style="background-color: ${getRoomColor(roomId)};"></div>
+                        <span>${roomName}${!hasEvents ? ' (vide)' : ''}</span>
+                    </div>
+                `;
+            });
+        }
+
+        legendContainer.innerHTML = legendHTML;
+    }
+
+    // Update statistics
+    function updateStats() {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+
+        // Count events this month
+        const monthEvents = allEvents.filter(event => {
+            const eventDate = new Date(event.start);
+            return eventDate >= startOfMonth && eventDate <= endOfMonth;
+        }).length;
+
+        // Count events today
+        const todayEvents = allEvents.filter(event => {
+            const eventDate = new Date(event.start);
+            return eventDate >= startOfDay && eventDate < endOfDay;
+        }).length;
+
+        document.getElementById('total-events').textContent = monthEvents;
+        document.getElementById('today-events').textContent = todayEvents;
+    }
+</script>
+</body>
+</html>

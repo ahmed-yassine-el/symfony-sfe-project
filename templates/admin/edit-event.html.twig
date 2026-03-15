@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier l'Événement - ENCG Events Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .form-control:focus {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #a71e2a 0%, #dc3545 100%);
+            transform: translateY(-2px);
+        }
+        .breadcrumb {
+            background-color: transparent;
+            padding: 0;
+        }
+        .breadcrumb-item + .breadcrumb-item::before {
+            content: ">";
+            color: #dc3545;
+        }
+        .breadcrumb-item a {
+            color: #dc3545;
+            text-decoration: none;
+        }
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        .alert {
+            border-radius: 10px;
+            border: none;
+        }
+        .form-label {
+            font-weight: 600;
+            color: #dc3545;
+            margin-bottom: 8px;
+        }
+        .input-group-text {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+            border: none;
+        }
+        .admin-badge {
+            background: linear-gradient(135deg, #dc3545 0%, #a71e2a 100%);
+            color: white;
+            font-size: 0.7em;
+            padding: 0.2em 0.5em;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar p-0">
+            <div class="p-4">
+                <div class="d-flex align-items-center mb-4">
+                    <i class="fas fa-shield-alt fa-2x me-2"></i>
+                    <h4 class="mb-0">Admin Panel</h4>
+                </div>
+
+                <!-- User Info -->
+                <div class="text-center mb-4 p-3" style="background-color: rgba(255,255,255,0.1); border-radius: 10px;">
+                    <div class="user-avatar mx-auto mb-2">
+                        {{ app.user.email|first|upper }}
+                    </div>
+                    <h6 class="mb-1">{{ app.user.email }}</h6>
+                    <span class="admin-badge">ADMINISTRATEUR</span>
+                </div>
+
+                <!-- Navigation -->
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="{{ path('app_admin_dashboard') }}">
+                        <i class="fas fa-calendar-check me-2"></i> Toutes les Réservations
+                    </a>
+                    <a class="nav-link" href="{{ path('app_dashboard') }}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Mon Dashboard
+                    </a>
+                    <a class="nav-link" href="{{ path('app_home') }}">
+                        <i class="fas fa-home me-2"></i> Accueil Public
+                    </a>
+                    <hr class="my-3" style="border-color: rgba(255,255,255,0.2);">
+                    <a class="nav-link" href="{{ path('app_logout') }}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Déconnexion
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content p-0">
+            <div class="p-4">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="mb-1">Modifier l'Événement (Admin)</h2>
+                        <nav aria-label="breadcrumb">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard') }}">Administration</a></li>
+                                <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard') }}">Toutes les Réservations</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Modifier l'Événement</li>
+                            </ol>
+                        </nav>
+                        <p class="text-muted mb-0">Modification administrative - Tous les événements peuvent être modifiés</p>
+                    </div>
+                    <div class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>
+                        {{ "now"|date("d/m/Y") }}
+                    </div>
+                </div>
+
+                <!-- Flash Messages -->
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ label == 'success' ? 'check-circle' : (label == 'error' ? 'exclamation-circle' : 'info-circle') }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+
+                <!-- Event Owner Info -->
+                <div class="card mb-4">
+                    <div class="card-header bg-white border-bottom-0">
+                        <h6 class="mb-0">
+                            <i class="fas fa-user me-2 text-danger"></i>
+                            Propriétaire de l'événement
+                        </h6>
+                    </div>
+                    <div class="card-body py-2">
+                        <div class="d-flex align-items-center">
+                            <div class="user-initial me-2" style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: bold;">
+                                {{ reservation.user.email|first|upper }}
+                            </div>
+                            <div>
+                                <strong>{{ reservation.user.email|split('@')|first|title }}</strong>
+                                <br><small class="text-muted">{{ reservation.user.email }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Form -->
+                <div class="card">
+                    <div class="card-header bg-white border-bottom-0">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2 text-danger"></i>
+                            Modifier l'Événement: {{ event.name }}
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="event_name" class="form-label">
+                                    <i class="fas fa-tag me-1"></i>Nom de l'Événement
+                                </label>
+                                {{ form_widget(form.name, {'attr': {'class': 'form-control', 'placeholder': 'Entrez le nom de l\'événement'}}) }}
+                                {{ form_errors(form.name) }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="event_room" class="form-label">
+                                    <i class="fas fa-door-open me-1"></i>Salle
+                                </label>
+                                {{ form_widget(form.room, {'attr': {'class': 'form-control'}}) }}
+                                {{ form_errors(form.room) }}
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="startTime" class="form-label">
+                                    <i class="fas fa-play me-1"></i>Heure de Début
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <input type="datetime-local"
+                                           class="form-control"
+                                           id="startTime"
+                                           name="startTime"
+                                           value="{{ reservation.startTime|date('Y-m-d\\TH:i') }}"
+                                           required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="endTime" class="form-label">
+                                    <i class="fas fa-stop me-1"></i>Heure de Fin
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    <input type="datetime-local"
+                                           class="form-control"
+                                           id="endTime"
+                                           name="endTime"
+                                           value="{{ reservation.endTime|date('Y-m-d\\TH:i') }}"
+                                           required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="event_description" class="form-label">
+                                <i class="fas fa-align-left me-1"></i>Description
+                            </label>
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 5, 'placeholder': 'Décrivez l\'événement...'}}) }}
+                            {{ form_errors(form.description) }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="event_imageFile" class="form-label">
+                                <i class="fas fa-image me-1"></i>Image de l'Événement
+                            </label>
+                            {{ form_widget(form.imageFile, {'attr': {'class': 'form-control', 'accept': 'image/jpeg,image/png'}}) }}
+                            <div class="form-text">Téléchargez une nouvelle image pour remplacer l'actuelle (JPEG ou PNG, max 1MB)</div>
+                            {{ form_errors(form.imageFile) }}
+                        </div>
+
+                        {% if event.image %}
+                            <div class="mb-4">
+                                <label class="form-label">Image Actuelle</label>
+                                <div class="text-center">
+                                    <img src="{{ asset('uploads/' ~ event.image) }}"
+                                         alt="{{ event.name }}"
+                                         class="img-thumbnail"
+                                         style="max-height: 200px; border-radius: 10px;">
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-3 justify-content-end">
+                            <a href="{{ path('app_admin_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Retour aux réservations
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Mettre à jour l'Événement
+                            </button>
+                        </div>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Form validation
+    (function() {
+        'use strict';
+        var forms = document.querySelectorAll('.needs-validation');
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+
+    // Date validation
+    document.getElementById('endTime').addEventListener('change', function() {
+        var startTime = document.getElementById('startTime').value;
+        var endTime = this.value;
+
+        if (startTime && endTime && new Date(endTime) <= new Date(startTime)) {
+            this.setCustomValidity('L\'heure de fin doit être postérieure à l\'heure de début');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+
+    document.getElementById('startTime').addEventListener('change', function() {
+        var endTime = document.getElementById('endTime');
+        endTime.dispatchEvent(new Event('change'));
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+{% extends 'Home/homebase.html.twig' %}
+
+{% block title %}ENCG Events - Accueil{% endblock %}
+
+{% block body %}
+    <!-- Add login button for non-authenticated users -->
+    {% if not app.user %}
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1000;">
+            <a href="{{ path('app_login') }}" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt me-1"></i> Connexion
+            </a>
+        </div>
+    {% else %}
+        <div class="position-fixed top-0 end-0 p-3" style="z-index: 1000;">
+            <div class="dropdown">
+                <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user me-1"></i> {{ app.user.email|split('@')|first|title }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ path('app_dashboard') }}">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ path('app_logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i> Déconnexion
+                        </a></li>
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <section class="home container" id="home">
+        <div class="home-text">
+            <h1>Découvrez les Événements <br> de l'ENCG Agadir <br> en Temps Réel</h1>
+            <p>Restez informé de tous les événements académiques, conférences, séminaires et activités organisés à l'ENCG Agadir. Consultez les détails et ne manquez aucun événement important de votre école.</p>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about container" id="about">
+        <div class="about-img">
+            <img src="{{ asset('images/encgagadir.jpg') }}" alt="ENCG Agadir">
+        </div>
+        <div class="about-text">
+            <span>À propos</span>
+            <h2>École Nationale de Commerce <br> et de Gestion d'Agadir</h2>
+            <p>L'École Nationale de Commerce et de Gestion d'Agadir est un établissement public de l'Université Ibn Zohr et composante du réseau des ENCG du Royaume. Créée en 1994, l'ENCG-UIZ Agadir forme des cadres hautement qualifiés dans les domaines liés au commerce et à la gestion.</p>
+            <p>L'ENCG Agadir a pour objectif de former des cadres spécialisés en techniques de marketing, commerce international, en techniques comptables, financières, aux outils d'audit, du contrôle de gestion et les systèmes d'information et de communication.</p>
+        </div>
+    </section>
+
+    <!-- Events Section -->
+    <section class="properties-container container" id="events">
+        <div class="heading">
+            <span>Événements</span>
+            <h2>Événements à Venir</h2>
+            <p>Découvrez tous les événements organisés à l'ENCG Agadir.</p>
+        </div>
+
+        <div class="properties container" id="events-grid">
+            {% if activeReservations %}
+                {% for reservation in activeReservations %}
+                    <div class="box" onclick="openEventModal({{ reservation.id }}, '{{ reservation.event ? (reservation.event.name|e('js')) : '' }}', '{{ reservation.room ? (reservation.room.name|e('js')) : '' }}', '{{ reservation.startTime|date('d/m/Y à H:i') }}', '{{ reservation.endTime|date('d/m/Y à H:i') }}', '{{ reservation.user ? (reservation.user.email|e('js')) : '' }}' , '{{ reservation.event ? (reservation.event.description|e('js')|nl2br|raw|e('js')) : '' }}')">
+                        <h3>{{ reservation.event.name }}</h3>
+                        <div class="content">
+                            <div class="text">
+                                <p><strong>Date:</strong>
+                                    {% if reservation.startTime|date('Y-m-d') == reservation.endTime|date('Y-m-d') %}
+                                        {{ reservation.startTime|date('d/m/Y') }}
+                                    {% else %}
+                                        {{ reservation.startTime|date('d/m/Y') }} - {{ reservation.endTime|date('d/m/Y') }}
+                                    {% endif %}
+                                </p>
+                                <p><strong>Organisateur: Prof {{ reservation.user ? reservation.user.name : 'N/A' }}</strong></p>
+                            </div>
+                            <div class="icon">
+                                <i class='bx bx-time'>
+                        <span>
+                            {% set diff = date(reservation.endTime).diff(date(reservation.startTime)) %}
+                            {% if diff.days > 0 %}
+                                {{ diff.days }}j
+                            {% elseif diff.h > 0 %}
+                                {{ diff.h }}h
+                            {% else %}
+                                {{ diff.i }}min
+                            {% endif %}
+                        </span>
+                                </i>
+                                <i class='bx bx-calendar'>
+                                    <span>{{ reservation.startTime|date('H:i') }}</span>
+                                </i>
+                            </div>
+                        </div>
+                    </div> <!-- This closing div was missing! -->
+                {% endfor %}
+            {% else %}
+                <div class="no-events">
+                    <h3>Aucun événement programmé actuellement</h3>
+                    <p>Revenez bientôt pour découvrir nos prochains événements.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Modal for Event Details -->
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEventModal()">&times;</span>
+            <div class="modal-header">
+                <h2 id="modalEventName"></h2>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info">
+                    <div class="info-item">
+                        <i class='bx bx-building'></i>
+                        <strong>Salle:</strong> <span id="modalRoom"></span>
+                    </div>
+                    <div class="info-item">
+                        <i class='bx bx-calendar-event'></i>
+                        <strong>Début:</strong> <span id="modalStartTime"></span>
+                    </div>
+                    <div class="info-item">
+                        <i class='bx bx-calendar-x'></i>
+                        <strong>Fin:</strong> <span id="modalEndTime"></span>
+                    </div>
+                    <div class="info-item">
+                        <i class='bx bx-user'></i>
+                        <strong>Organisateur:</strong> <span id="modalOrganizer"></span>
+                    </div>
+                </div>
+                <div class="modal-description">
+                    <h3>Description</h3>
+                    <p id="modalDescription"></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section-->
+    <section class="Newsletter container" id="contact">
+        <h2>Besoin d'Informations?<br>Contactez-Nous</h2>
+        <form action="#" method="post">
+            <input type="email" name="email" id="email-box" placeholder="votre.email@encg.ac.ma" required>
+            <input type="submit" value="Envoyer" class="btn">
+        </form>
+    </section>
+
+    <style>
+        .box {
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(44, 90, 160, 0.15);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s;
+        }
+
+        .modal-header {
+            background-color: #2c5aa0;
+            color: white;
+            padding: 20px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.8rem;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-info {
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .info-item i {
+            color: #2c5aa0;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            width: 24px;
+        }
+
+        .modal-description {
+            border-top: 1px solid #eee;
+            padding-top: 20px;
+        }
+
+        .modal-description h3 {
+            color: #2c5aa0;
+            margin-bottom: 10px;
+        }
+
+        .close {
+            color: white;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .close:hover {
+            opacity: 0.8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+                margin: 10% auto;
+            }
+
+            .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .info-item i {
+                margin-bottom: 5px;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function openEventModal(id, eventName, room, startTime, endTime, organizer, description) {
+            document.getElementById('modalEventName').textContent = eventName;
+            document.getElementById('modalRoom').textContent = room;
+            document.getElementById('modalStartTime').textContent = startTime;
+            document.getElementById('modalEndTime').textContent = endTime;
+            document.getElementById('modalOrganizer').textContent = organizer;
+            document.getElementById('modalDescription').innerHTML = description || 'Aucune description disponible.';
+
+            document.getElementById('eventModal').style.display = 'block';
+        }
+
+        function closeEventModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('eventModal');
+            if (event.target == modal) {
+                closeEventModal();
+            }
+        }
+
+        // Auto-refresh events every 5 minutes
+        setInterval(async function() {
+            try {
+                const response = await fetch('{{ path('api_events') }}');
+                const events = await response.json();
+                updateEventsGrid(events);
+            } catch (error) {
+                console.log('Auto-refresh failed:', error);
+            }
+        }, 5 * 60 * 1000);
+
+        function updateEventsGrid(events) {
+            const grid = document.getElementById('events-grid');
+            if (!events || events.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-events">
+                        <h3>Aucun événement programmé actuellement</h3>
+                        <p>Revenez bientôt pour découvrir nos prochains événements.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            events.forEach(event => {
+                const startDate = new Date(event.start_date).toLocaleDateString('fr-FR');
+                const endDate = new Date(event.end_date).toLocaleDateString('fr-FR');
+                const dateRange = startDate === endDate ? startDate : `${startDate} - ${endDate}`;
+                const startTime = new Date(event.start_date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+                const startDateTime = new Date(event.start_date).toLocaleDateString('fr-FR') + ' à ' + startTime;
+                const endDateTime = new Date(event.end_date).toLocaleDateString('fr-FR') + ' à ' + new Date(event.end_date).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+
+                html += `
+                    <div class="box" onclick="openEventModal(${event.id}, '${event.event_name.replace(/'/g, "\\'")}', '${event.room_name}', '${startDateTime}', '${endDateTime}', '${event.organizer}', '${(event.description || '').replace(/'/g, "\\'")}')">
+                        <h3>${event.event_name}</h3>
+                        <div class="content">
+                            <div class="text">
+                                <p><strong>Date:</strong> ${dateRange}</p>
+                                <p><strong>Organisateur:</strong> ${event.organizer}</p>
+                            </div>
+                            <div class="icon">
+                                <i class='bx bx-time'><span>${event.duration}</span></i>
+                                <i class='bx bx-calendar'><span>${startTime}</span></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            grid.innerHTML = html;
+        }
+    </script>
+{% endblock %}

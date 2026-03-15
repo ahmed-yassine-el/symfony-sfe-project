@@ -1,0 +1,5 @@
+controllers:
+  resource:
+    path: ../../src/Controller/
+    namespace: App\Controller
+  type: attribute  # Even for annotations, use 'attribute' type in Symfony 7

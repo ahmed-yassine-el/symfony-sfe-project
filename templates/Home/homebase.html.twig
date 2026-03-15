@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ENCG Events {% endblock %}</title>
+
+    {% block stylesheets %}
+        <link rel="stylesheet" href="{{ asset('css/Styleis.css') }}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+        <style>
+            /* Custom logo class */
+            .encg-logo {
+                display: inline-flex;
+                align-items: center;
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: #2c5aa0;
+                text-decoration: none;
+            }
+            .encg-logo img {
+                height: 50px;
+                width: auto;
+                margin-right: 10px;
+            }
+            .encg-logo:hover {
+                text-decoration: none;
+                opacity: 0.8;
+            }
+            #events-grid {
+                display: grid !important;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+                gap: 2rem !important;
+            }
+        </style>
+    {% endblock %}
+</head>
+<body>
+<header>
+    <div class="nav container">
+        <a href="{{ path('app_home') }}" class="logo encg-logo">
+            <img src="{{ asset('images/ENCG logo.png') }}" alt="ENCG Logo">
+            ENCG Events
+        </a>
+        <input type="checkbox" name="" id="menu">
+        <label for="menu">
+            <i class='bx bx-menu' id="menu-icon"></i>
+        </label>
+
+        <ul class="navbar">
+            <li><a href="{{ path('app_home') }}#home">Accueil</a></li>
+            <li><a href="{{ path('app_home') }}#about">À propos</a></li>
+            <li><a href="{{ path('app_home') }}#events">Événements</a></li>
+        </ul>
+
+        <div class="user-section">
+            {% if app.user %}
+                <img src="{{ asset('images/usericon.png') }}" alt="User" class="user-icon">
+                <span id="username">{{ app.user.email }}</span>
+                <a href="{{ path('app_logout') }}" class="btn">Déconnexion</a>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="btn" id="login-btn">Connexion</a>
+            {% endif %}
+        </div>
+    </div>
+</header>
+
+<main>
+    {% block body %}{% endblock %}
+</main>
+
+<section class="footer">
+    <div class="footer-container container">
+        <h2>ENCG Events</h2>
+        <div class="footer-box">
+            <h3>Liens Rapides</h3>
+            <a href="{{ path('app_home') }}">Accueil</a>
+            <a href="#events">Événements</a>
+            <a href="#about">À propos</a>
+            <a href="#contact">Contact</a>
+        </div>
+        <div class="footer-box">
+            <h3>Services</h3>
+            <a href="#contact">Support technique</a>
+            <a href="#contact">FAQ</a>
+        </div>
+        <div class="footer-box">
+            <h3>Contact</h3>
+            <a href="tel:+212626289291">+212 (0) 528 22 91 56</a>
+            <a href="mailto:events@encg-agadir.ac.ma">events@encg-agadir.ac.ma</a>
+            <div class="social">
+                <a href="#"><i class='bx bxl-facebook'></i></a>
+                <a href="#"><i class='bx bxl-twitter'></i></a>
+                <a href="#"><i class='bx bxl-instagram'></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% block javascripts %}
+    <script src="{{ asset('js/app.js') }}"></script>
+{% endblock %}
+</body>
+</html>
