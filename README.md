@@ -240,6 +240,3 @@ April 7 – May 26, 2024
 This project was developed for **educational purposes**.
 
 ---
-
-
-Those sections are what make projects look like **real professional software projects instead of student assignments**.
